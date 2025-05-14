@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק עץ הרגשות</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            direction: rtl;
+        }
+        
+        .header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 90%;
+            max-width: 800px;
+        }
+        
+        .emotions-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        
+        .emotion {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: grab;
+            background-color: #fff;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            justify-content: center;
+            box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none;
+            font-size: 1.2em;
+        }
+        
+        .emotion:hover {
+            transform: scale(1.1);
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .emotion img, .emotion-icon {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+        
+        .situations-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+        
+        .situation {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .situation-text {
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+        
+        .drop-zone {
+            width: 100%;
+            height: 60px;
+            border: 2px dashed #4a90e2;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: auto;
+            transition: background-color 0.3s;
+        }
+        
+        .drop-zone.highlight {
+            background-color: #e6f0ff;
+        }
+        
+        .dropped-emotion {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .reset-btn {
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        
+        .reset-btn:hover {
+            background-color: #3a7bc8;
+        }
+        
+        .correct {
+            border: 2px solid #4caf50;
+            background-color: #e8f5e9;
+        }
+        
+        .incorrect {
+            border: 2px solid #f44336;
+            background-color: #ffebee;
+        }
+        
+        .feedback {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 5px;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 100;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        
+        .correct-feedback {
+            background-color: #4caf50;
+        }
+        
+        .incorrect-feedback {
+            background-color: #f44336;
+        }
+
+        .show {
+            opacity: 1;
+        }
+        
+        .tree-container {
+            width: 300px;
+            height: 400px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .tree {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .tree-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 120px;
+            background-color: #8B4513;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        .tree-crown {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 250px;
+            background-color: #228B22;
+            border-radius: 50% 50% 50% 50%;
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+            width: 100%;
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #4caf50;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        @media (max-width: 600px) {
+            .emotions-container {
+                gap: 10px;
+            }
+            
+            .emotion {
+                width: 60px;
+                height: 60px;
+                font-size: 1em;
+            }
+            
+            .situation {
+                padding: 10px;
+            }
+            
+            .tree-container {
+                width: 200px;
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>משחק עץ הרגשות</h1>
+        <p>גררו את הרגשות המתאימים לכל סיטואציה</p>
+    </div>
+    
+    <div class="tree-container">
+        <div class="tree">
+            <div class="tree-crown"></div>
+            <div class="tree-base"></div>
+        </div>
+    </div>
+    
+    <div class="game-container">
+        <div class="emotions-container" id="emotions-container">
+            <!-- רגשות יתווספו בדינמיות מהקוד -->
+        </div>
+        
+        <div class="situations-container" id="situations-container">
+            <!-- סיטואציות יתווספו בדינמיות מהקוד -->
+        </div>
+        
+        <div class="progress-container">
+            <h3>התקדמות</h3>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+        </div>
+        
+        <button class="reset-btn" id="reset-btn">התחל מחדש</button>
+    </div>
+    
+    <div class="feedback" id="feedback"></div>
+    
+    <script>
+        // רשימת רגשות עם אייקונים
+        const emotions = [
+            { name: "שמחה", icon: "😊", color: "#FFD700" },
+            { name: "עצב", icon: "😢", color: "#4682B4" },
+            { name: "כעס", icon: "😠", color: "#FF6347" },
+            { name: "פחד", icon: "😨", color: "#800080" },
+            { name: "הפתעה", icon: "😲", color: "#FF69B4" },
+            { name: "גאווה", icon: "😌", color: "#32CD32" },
+            { name: "קנאה", icon: "😒", color: "#7CFC00" },
+            { name: "בושה", icon: "😳", color: "#FFA07A" },
+            { name: "אהבה", icon: "❤️", color: "#FF1493" },
+            { name: "שעמום", icon: "😴", color: "#A9A9A9" },
+        ];
+
+        // רשימת סיטואציות עם הרגש המתאים
+        const situations = [
+            { 
+                text: "ילד קיבל מתנה ליום הולדת שממש רצה",
+                correctEmotion: "שמחה"
+            },
+            { 
+                text: "ילדה איבדה את הצעצוע האהוב שלה",
+                correctEmotion: "עצב"
+            },
+            { 
+                text: "ילד שהחבר שלו לקח ממנו את המשחק בלי רשות",
+                correctEmotion: "כעס"
+            },
+            { 
+                text: "ילדה שנתקלה בכלב גדול ונובח",
+                correctEmotion: "פחד"
+            },
+            { 
+                text: "ילד שמפתיעים אותו עם מסיבה שלא ציפה לה",
+                correctEmotion: "הפתעה"
+            },
+            { 
+                text: "ילדה שהצליחה לפתור תרגיל קשה בכיתה",
+                correctEmotion: "גאווה"
+            },
+            { 
+                text: "ילד שחברו קיבל צעצוע חדש שגם הוא מאוד רוצה",
+                correctEmotion: "קנאה"
+            },
+            { 
+                text: "ילדה שנפלה בחצר בית הספר וכולם צחקו",
+                correctEmotion: "בושה"
+            },
+            { 
+                text: "ילד שמחבק את אמא שלו לפני השינה",
+                correctEmotion: "אהבה"
+            },
+            { 
+                text: "ילדה שיושבת בשיעור ארוך שאינו מעניין אותה",
+                correctEmotion: "שעמום"
+            },
+        ];
+
+        let correctMatches = 0;
+        const totalSituations = situations.length;
+
+        // יצירת אלמנטי רגשות
+        const emotionsContainer = document.getElementById('emotions-container');
+        emotions.forEach(emotion => {
+            const emotionElement = document.createElement('div');
+            emotionElement.className = 'emotion';
+            emotionElement.style.backgroundColor = emotion.color;
+            emotionElement.setAttribute('draggable', true);
+            emotionElement.setAttribute('data-emotion', emotion.name);
+            
+            const emotionIcon = document.createElement('div');
+            emotionIcon.className = 'emotion-icon';
+            emotionIcon.textContent = emotion.icon;
+            
+            const emotionName = document.createElement('div');
+            emotionName.textContent = emotion.name;
+            
+            emotionElement.appendChild(emotionIcon);
+            emotionElement.appendChild(emotionName);
+            emotionsContainer.appendChild(emotionElement);
+            
+            // הוספת מאזיני גרירה
+            emotionElement.addEventListener('dragstart', dragStart);
+        });
+
+        // יצירת אלמנטי סיטואציות
+        const situationsContainer = document.getElementById('situations-container');
+        situations.forEach((situation, index) => {
+            const situationElement = document.createElement('div');
+            situationElement.className = 'situation';
+            
+            const situationText = document.createElement('div');
+            situationText.className = 'situation-text';
+            situationText.textContent = situation.text;
+            
+            const dropZone = document.createElement('div');
+            dropZone.className = 'drop-zone';
+            dropZone.setAttribute('data-correct-emotion', situation.correctEmotion);
+            dropZone.setAttribute('data-index', index);
+            dropZone.textContent = 'גרור רגש לכאן';
+            
+            situationElement.appendChild(situationText);
+            situationElement.appendChild(dropZone);
+            situationsContainer.appendChild(situationElement);
+            
+            // הוספת מאזיני גרירה
+            dropZone.addEventListener('dragover', dragOver);
+            dropZone.addEventListener('dragenter', dragEnter);
+            dropZone.addEventListener('dragleave', dragLeave);
+            dropZone.addEventListener('drop', drop);
+        });
+
+        // פונקציות גרירה
+        let draggedEmotion = null;
+
+        function dragStart(e) {
+            draggedEmotion = {
+                element: this,
+                name: this.getAttribute('data-emotion'),
+                icon: this.querySelector('.emotion-icon').textContent,
+                color: this.style.backgroundColor
+            };
+            
+            setTimeout(() => {
+                this.style.opacity = '0.4';
+            }, 0);
+        }
+
+        function dragOver(e) {
+            e.preventDefault();
+        }
+
+        function dragEnter(e) {
+            e.preventDefault();
+            this.classList.add('highlight');
+        }
+
+        function dragLeave() {
+            this.classList.remove('highlight');
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            this.classList.remove('highlight');
+            
+            if (this.querySelector('.dropped-emotion')) {
+                // כבר יש רגש כאן
+                return;
+            }
+            
+            const correctEmotion = this.getAttribute('data-correct-emotion');
+            const isCorrect = draggedEmotion.name === correctEmotion;
+            
+            // יצירת אלמנט רגש שהושם
+            const droppedEmotionElement = document.createElement('div');
+            droppedEmotionElement.className = 'dropped-emotion';
+            droppedEmotionElement.style.backgroundColor = draggedEmotion.color;
+            
+            const droppedEmotionIcon = document.createElement('span');
+            droppedEmotionIcon.textContent = draggedEmotion.icon + ' ' + draggedEmotion.name;
+            
+            droppedEmotionElement.appendChild(droppedEmotionIcon);
+            this.textContent = '';
+            this.appendChild(droppedEmotionElement);
+            
+            // סימון אם נכון או לא
+            if (isCorrect) {
+                this.classList.add('correct');
+                showFeedback(true);
+                correctMatches++;
+            } else {
+                this.classList.add('incorrect');
+                showFeedback(false);
+            }
+            
+            // עדכון סרגל התקדמות
+            updateProgress();
+            
+            // מניעת גרירה נוספת של הרגש
+            draggedEmotion.element.style.opacity = '0.4';
+            draggedEmotion.element.setAttribute('draggable', false);
+            draggedEmotion = null;
+        }
+
+        // פונקציה להצגת משוב
+        function showFeedback(isCorrect) {
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback ' + (isCorrect ? 'correct-feedback' : 'incorrect-feedback');
+            feedback.textContent = isCorrect ? 'נכון מאוד!' : 'נסה שוב...';
+            feedback.classList.add('show');
+            
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 2000);
+        }
+
+        // פונקציה לעדכון סרגל התקדמות
+        function updateProgress() {
+            const progressBar = document.getElementById('progress');
+            const percentage = (correctMatches / totalSituations) * 100;
+            progressBar.style.width = percentage + '%';
+            
+            // בדיקה אם המשחק הסתיים
+            if (correctMatches === totalSituations) {
+                setTimeout(() => {
+                    alert('כל הכבוד! סיימת בהצלחה את המשחק!');
+                }, 1000);
+            }
+        }
+
+        // כפתור איפוס
+        document.getElementById('reset-btn').addEventListener('click', resetGame);
+
+        function resetGame() {
+            // איפוס הסיטואציות
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => {
+                zone.textContent = 'גרור רגש לכאן';
+                zone.classList.remove('correct', 'incorrect');
+            });
+            
+            // איפוס הרגשות
+            const emotionElements = document.querySelectorAll('.emotion');
+            emotionElements.forEach(emotion => {
+                emotion.style.opacity = '1';
+                emotion.setAttribute('draggable', true);
+            });
+            
+            // איפוס המשתנים והתקדמות
+            correctMatches = 0;
+            updateProgress();
+        }
+    </script>
+</body>
+</html>
